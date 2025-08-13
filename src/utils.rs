@@ -2,14 +2,16 @@ use macroquad::prelude::*;
 
 #[derive(Clone)]
 pub struct Vehicle {
-    pub x: u32,
-    pub y: u32,
-    pub speed: u32,
+    pub x: i32,
+    pub y: i32,
+    pub speed: i32,
     pub color: Color,
     pub direction: Direction,
+    pub turn: Turn,
+    pub dar: bool,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum Direction {
     Up,
     Down,
@@ -17,45 +19,90 @@ pub enum Direction {
     Right,
 }
 
+#[derive(Clone, PartialEq)]
+pub enum Turn {
+    Left,
+    Right,
+    Straight,
+}
+
+const SCARLET: Color = Color::from_rgba(255, 36, 0, 255);
+
 impl Vehicle {
-    pub fn new(x: u32, y: u32, speed: u32, color: Color, direction: Direction) -> Self {
-        Vehicle {
+    pub fn new(x: i32, y: i32, speed: i32, direction: Direction) -> Self {
+        let mut a = Vehicle {
             x,
             y,
             speed,
-            color,
+            color: WHITE,
             direction,
-        }
+            turn: Turn::Straight,
+            dar : false
+        };
+        a.color = Vehicle::color(&a);
+        a.turn = match a.color {
+            BLUE => Turn::Left,
+            YELLOW => Turn::Right,
+            SCARLET => Turn::Straight,
+            _ => Turn::Straight,
+        };
+        a
+    }
+
+    pub fn color(&self) -> Color {
+        let colors = vec![SCARLET, BLUE, YELLOW];
+        colors[quad_rand::gen_range(0, colors.len())]
     }
 
     pub fn update(&mut self) {
         match self.direction {
             Direction::Up => {
-                if self.y <= self.speed {
-                    self.y = 0;
-                } else {
-                    self.y -= self.speed
+                self.y -= self.speed;
+                if self.y <= 405 && !self.dar {
+                    if self.turn == Turn::Right{
+                        self.direction = Direction::Right;
+                        self.dar = true;
+                    } else if self.turn == Turn::Left && self.y <= 355 {
+                        self.direction = Direction::Left;
+                        self.dar = true;
+                    }
                 }
             }
             Direction::Down => {
-                if self.y + self.speed >= 800 {
-                    self.y = 800;
-                } else {
-                    self.y += self.speed
+                self.y += self.speed;   
+                if self.y >= 355 && !self.dar {
+                    if self.turn == Turn::Left {
+                        self.direction = Direction::Left;
+                        self.dar = true;
+                    }
+                    if self.turn == Turn::Right && self.y >= 405{
+                        self.direction = Direction::Right;
+                        self.dar = true;
+                    } 
                 }
             }
             Direction::Left => {
-                if self.x <= self.speed {
-                    self.x = 0;
-                } else {
-                    self.x -= self.speed
+                self.x -= self.speed;
+                if self.x <= 405 && !self.dar {
+                    if self.turn == Turn::Right && self.x <= 455 {
+                        self.direction = Direction::Up;
+                        self.dar = true;
+                    } else if self.turn == Turn::Left && self.x <= 355 {
+                        self.direction = Direction::Down;
+                        self.dar = true;
+                    }
                 }
             }
             Direction::Right => {
-                if self.x + self.speed >= 800 {
-                    self.x = 800;
-                } else {
-                    self.x += self.speed
+                self.x += self.speed;
+                if self.x >= 355 && !self.dar {
+                    if self.turn == Turn::Right {
+                        self.direction = Direction::Down;
+                        self.dar = true;
+                    } else if self.turn == Turn::Left && self.x >= 405 {
+                        self.direction = Direction::Up;
+                        self.dar = true;
+                    }
                 }
             }
         }
