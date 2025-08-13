@@ -66,19 +66,21 @@ async fn main() {
             };
         }
 
-        for car in vehicles_up.iter_mut() {
+        for (i, car) in vehicles_up.iter_mut().enumerate() {
+            if i < vehicles_up.len() - 1 && car.y - vehicles_up[i + 1].y <= 30 {
+                car.update();
+            }
+            car.draw();
+        }
+        for (i, car) in vehicles_down.iter_mut().enumerate() {
             car.update();
             car.draw();
         }
-        for car in vehicles_down.iter_mut() {
+        for (i, car) in vehicles_left.iter_mut().enumerate() {
             car.update();
             car.draw();
         }
-        for car in vehicles_left.iter_mut() {
-            car.update();
-            car.draw();
-        }
-        for car in vehicles_right.iter_mut() {
+        for (i, car) in vehicles_right.iter_mut().enumerate() {
             car.update();
             car.draw();
         }
