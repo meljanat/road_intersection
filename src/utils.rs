@@ -9,8 +9,27 @@ pub struct Vehicle {
     pub direction: Direction,
     pub turn: Turn,
     pub dar: bool,
-    pub flmorb3 :bool,
-    pub pause : bool
+    pub flmorb3: bool,
+    pub pause: bool,
+}
+
+pub struct TrafficLights {
+    pub up: TrafficLight,
+    pub down: TrafficLight,
+    pub right: TrafficLight,
+    pub left: TrafficLight,
+}
+
+pub struct TrafficLight {
+    pub x: i32,
+    pub y: i32,
+    pub light: Light,
+}
+
+#[derive(Clone, PartialEq)]
+pub enum Light {
+    Red,
+    Green,
 }
 
 #[derive(Clone, PartialEq)]
@@ -36,23 +55,13 @@ impl Vehicle {
             x,
             y,
             speed,
-            color: WHITE,
+            color: Vehicle::color(),
             direction,
             turn: Turn::Straight,
-            dar : false,
-            flmorb3 : false ,
-            pause : false ,
+            dar: false,
+            flmorb3: false,
+            pause: false,
         };
-            // a.color = YELLOW;
-        if a.direction == Direction::Right {
-            a.color = BLUE;
-        } else if a.direction == Direction::Left {
-            a.color = YELLOW;
-        } else if a.direction == Direction::Up {
-            a.color = RED;
-        } else {
-            a.color = YELLOW;
-        }
         a.turn = match a.color {
             SCARLET => Turn::Straight,
             BLUE => Turn::Left,
@@ -62,7 +71,7 @@ impl Vehicle {
         a
     }
 
-    pub fn color(&self) -> Color {
+    pub fn color() -> Color {
         let colors = vec![SCARLET, BLUE, YELLOW];
         colors[quad_rand::gen_range(0, colors.len())]
     }
@@ -70,20 +79,19 @@ impl Vehicle {
     pub fn update(&mut self) {
         if is_key_down(KeyCode::Space) {
             self.pause = false;
-        } 
+        }
         if self.pause {
             return;
         }
         match self.direction {
-            
             Direction::Up => {
                 self.y -= self.speed;
-                if self.y <= 450 {
+                if self.y <= 451 {
                     self.pause = true;
                 }
                 if self.y <= 405 && !self.dar {
                     self.flmorb3 = true;
-                    if self.turn == Turn::Right{
+                    if self.turn == Turn::Right {
                         self.direction = Direction::Right;
                         self.dar = true;
                     } else if self.turn == Turn::Left && self.y <= 355 {
@@ -93,13 +101,13 @@ impl Vehicle {
                 }
             }
             Direction::Down => {
-                self.y += self.speed;   
-                if self.y >= 320 {
+                self.y += self.speed;
+                if self.y >= 301 {
                     self.pause = true;
                 }
                 if self.y >= 355 && !self.dar {
                     self.flmorb3 = true;
-                    if self.turn == Turn::Right  {
+                    if self.turn == Turn::Right {
                         self.direction = Direction::Left;
                         self.dar = true;
                     } else if self.turn == Turn::Left && self.y >= 405 {
@@ -126,7 +134,7 @@ impl Vehicle {
             }
             Direction::Right => {
                 self.x += self.speed;
-                if self.x >= 320 {
+                if self.x >= 300 {
                     self.pause = true;
                 }
                 if self.x >= 355 && !self.dar {
@@ -160,6 +168,27 @@ impl Direction {
     }
 }
 
+impl TrafficLights {
+    pub fn draw(&self) {
+        match self.up.light {
+            Light::Red => draw_rectangle(self.up.x as f32, self.up.y as f32, 20., 20., RED),
+            Light::Green => draw_rectangle(self.up.x as f32, self.up.y as f32, 20., 20., GREEN),
+        }
+        match self.down.light {
+            Light::Red => draw_rectangle(self.down.x as f32, self.down.y as f32, 20., 20., RED),
+            Light::Green => draw_rectangle(self.down.x as f32, self.down.y as f32, 20., 20., GREEN),
+        }
+        match self.left.light {
+            Light::Red => draw_rectangle(self.left.x as f32, self.left.y as f32, 20., 20., RED),
+            Light::Green => draw_rectangle(self.left.x as f32, self.left.y as f32, 20., 20., GREEN),
+        }
+        match self.right.light {
+            Light::Red => draw_rectangle(self.right.x as f32, self.right.y as f32, 20., 20., RED),
+            Light::Green => draw_rectangle(self.right.x as f32, self.right.y as f32, 20., 20., GREEN),
+        }
+    }
+}
+
 pub fn draw_dashed_line_x(x1: u32, x2: u32, y: u32) {
     let mut x: u32 = x1;
     loop {
@@ -179,5 +208,30 @@ pub fn draw_dashed_line_y(x: u32, y1: u32, y2: u32) {
         if y >= y2 {
             break;
         }
+    }
+}
+
+pub fn make_lights() -> TrafficLights {
+    TrafficLights {
+        up: TrafficLight {
+            x: 330,
+            y: 330,
+            light: Light::Red,
+        },
+        down: TrafficLight {
+            x: 450,
+            y: 450,
+            light: Light::Green,
+        },
+        left: TrafficLight {
+            x: 330,
+            y: 450,
+            light: Light::Red,
+        },
+        right: TrafficLight {
+            x: 450,
+            y: 330,
+            light: Light::Green,
+        },
     }
 }
