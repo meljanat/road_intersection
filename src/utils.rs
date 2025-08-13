@@ -9,6 +9,8 @@ pub struct Vehicle {
     pub direction: Direction,
     pub turn: Turn,
     pub dar: bool,
+    pub flmorb3 :bool,
+    pub pause : bool
 }
 
 #[derive(Clone, PartialEq)]
@@ -37,13 +39,24 @@ impl Vehicle {
             color: WHITE,
             direction,
             turn: Turn::Straight,
-            dar : false
+            dar : false,
+            flmorb3 : false ,
+            pause : false ,
         };
-        a.color = Vehicle::color(&a);
+            // a.color = YELLOW;
+        if a.direction == Direction::Right {
+            a.color = BLUE;
+        } else if a.direction == Direction::Left {
+            a.color = YELLOW;
+        } else if a.direction == Direction::Up {
+            a.color = RED;
+        } else {
+            a.color = YELLOW;
+        }
         a.turn = match a.color {
+            SCARLET => Turn::Straight,
             BLUE => Turn::Left,
             YELLOW => Turn::Right,
-            SCARLET => Turn::Straight,
             _ => Turn::Straight,
         };
         a
@@ -55,10 +68,21 @@ impl Vehicle {
     }
 
     pub fn update(&mut self) {
+        if is_key_down(KeyCode::Space) {
+            self.pause = false;
+        } 
+        if self.pause {
+            return;
+        }
         match self.direction {
+            
             Direction::Up => {
                 self.y -= self.speed;
+                if self.y <= 450 {
+                    self.pause = true;
+                }
                 if self.y <= 405 && !self.dar {
+                    self.flmorb3 = true;
                     if self.turn == Turn::Right{
                         self.direction = Direction::Right;
                         self.dar = true;
@@ -70,21 +94,28 @@ impl Vehicle {
             }
             Direction::Down => {
                 self.y += self.speed;   
+                if self.y >= 320 {
+                    self.pause = true;
+                }
                 if self.y >= 355 && !self.dar {
-                    if self.turn == Turn::Left {
+                    self.flmorb3 = true;
+                    if self.turn == Turn::Right  {
                         self.direction = Direction::Left;
                         self.dar = true;
-                    }
-                    if self.turn == Turn::Right && self.y >= 405{
+                    } else if self.turn == Turn::Left && self.y >= 405 {
                         self.direction = Direction::Right;
                         self.dar = true;
-                    } 
+                    }
                 }
             }
             Direction::Left => {
                 self.x -= self.speed;
+                if self.x <= 450 {
+                    self.pause = true;
+                }
                 if self.x <= 405 && !self.dar {
-                    if self.turn == Turn::Right && self.x <= 455 {
+                    self.flmorb3 = true;
+                    if self.turn == Turn::Right {
                         self.direction = Direction::Up;
                         self.dar = true;
                     } else if self.turn == Turn::Left && self.x <= 355 {
@@ -95,7 +126,11 @@ impl Vehicle {
             }
             Direction::Right => {
                 self.x += self.speed;
+                if self.x >= 320 {
+                    self.pause = true;
+                }
                 if self.x >= 355 && !self.dar {
+                    self.flmorb3 = true;
                     if self.turn == Turn::Right {
                         self.direction = Direction::Down;
                         self.dar = true;
@@ -109,7 +144,7 @@ impl Vehicle {
     }
 
     pub fn draw(&self) {
-        draw_rectangle(self.x as f32, self.y as f32, 40.0, 40.0, self.color);
+        draw_rectangle(self.x as f32, self.y as f32, 30.0, 30.0, self.color);
     }
 }
 
