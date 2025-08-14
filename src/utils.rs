@@ -9,7 +9,6 @@ pub struct Vehicle {
     pub direction: Direction,
     pub turn: Turn,
     pub dar: bool,
-    pub flmorb3: bool,
     pub pause: bool,
 }
 
@@ -59,7 +58,6 @@ impl Vehicle {
             direction,
             turn: Turn::Straight,
             dar: false,
-            flmorb3: false,
             pause: false,
         };
         a.turn = match a.color {
@@ -76,21 +74,14 @@ impl Vehicle {
         colors[quad_rand::gen_range(0, colors.len())]
     }
 
-    pub fn update(&mut self) {
-        if is_key_down(KeyCode::Space) {
-            self.pause = false;
-        }
-        if self.pause {
-            return;
-        }
+    pub fn update(&mut self, lights: &TrafficLights) {
         match self.direction {
             Direction::Up => {
                 self.y -= self.speed;
-                if self.y <= 451 {
-                    self.pause = true;
-                }
+                // if self.y <= 451 {
+                //     self.pause = true;
+                // }
                 if self.y <= 405 && !self.dar {
-                    self.flmorb3 = true;
                     if self.turn == Turn::Right {
                         self.direction = Direction::Right;
                         self.dar = true;
@@ -102,11 +93,10 @@ impl Vehicle {
             }
             Direction::Down => {
                 self.y += self.speed;
-                if self.y >= 301 {
-                    self.pause = true;
-                }
+                // if self.y >= 301 {
+                //     self.pause = true;
+                // }
                 if self.y >= 355 && !self.dar {
-                    self.flmorb3 = true;
                     if self.turn == Turn::Right {
                         self.direction = Direction::Left;
                         self.dar = true;
@@ -118,11 +108,10 @@ impl Vehicle {
             }
             Direction::Left => {
                 self.x -= self.speed;
-                if self.x <= 450 {
-                    self.pause = true;
-                }
+                // if self.x <= 450 {
+                //     self.pause = true;
+                // }
                 if self.x <= 405 && !self.dar {
-                    self.flmorb3 = true;
                     if self.turn == Turn::Right {
                         self.direction = Direction::Up;
                         self.dar = true;
@@ -134,11 +123,10 @@ impl Vehicle {
             }
             Direction::Right => {
                 self.x += self.speed;
-                if self.x >= 300 {
-                    self.pause = true;
-                }
+                // if self.x >= 300 {
+                //     self.pause = true;
+                // }
                 if self.x >= 355 && !self.dar {
-                    self.flmorb3 = true;
                     if self.turn == Turn::Right {
                         self.direction = Direction::Down;
                         self.dar = true;
@@ -184,7 +172,9 @@ impl TrafficLights {
         }
         match self.right.light {
             Light::Red => draw_rectangle(self.right.x as f32, self.right.y as f32, 20., 20., RED),
-            Light::Green => draw_rectangle(self.right.x as f32, self.right.y as f32, 20., 20., GREEN),
+            Light::Green => {
+                draw_rectangle(self.right.x as f32, self.right.y as f32, 20., 20., GREEN)
+            }
         }
     }
 }
@@ -214,24 +204,24 @@ pub fn draw_dashed_line_y(x: u32, y1: u32, y2: u32) {
 pub fn make_lights() -> TrafficLights {
     TrafficLights {
         up: TrafficLight {
-            x: 330,
-            y: 330,
+            x: 450,
+            y: 450,
             light: Light::Red,
         },
         down: TrafficLight {
-            x: 450,
-            y: 450,
-            light: Light::Green,
+            x: 330,
+            y: 330,
+            light: Light::Red,
         },
         left: TrafficLight {
-            x: 330,
-            y: 450,
+            x: 450,
+            y: 330,
             light: Light::Red,
         },
         right: TrafficLight {
-            x: 450,
-            y: 330,
-            light: Light::Green,
+            x: 330,
+            y: 450,
+            light: Light::Red,
         },
     }
 }
